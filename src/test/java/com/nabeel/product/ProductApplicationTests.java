@@ -2,13 +2,43 @@ package com.nabeel.product;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
+import static org.mockito.BDDMockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
+import com.nabeel.product.Controller.ProductController;
 import com.nabeel.product.Model.Product;
+import com.nabeel.product.Repository.IProductRepository;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-//SpringBootTest
+
+@AutoConfigureJsonTesters
+@SpringBootTest
+@AutoConfigureMockMvc
 class ProductApplicationTests {
+
+	@Autowired
+    private MockMvc mvc;
+
+    @Mock
+    private IProductRepository productRepo;
+
+	@InjectMocks
+	private ProductController productController;
+
+	private JacksonTester<Product> jsonProduct;
+	private JacksonTester<List<Product>> jsonProducts;
 
 	@Test
 	void contextLoads() {
@@ -60,6 +90,15 @@ class ProductApplicationTests {
 		assertEquals(myPrice, cut.getPrice());
 	}
 
+	@Test
+	void getAllData() throws Exception{
+		Product cut = new Product(1L,"hello","short desc","long desc","image",2300l);
+		Product cut2 = new Product(1L,"hello","short desc","long desc","image",2300l);
+		given(productRepo.findAll()).willReturn(List.of(cut, cut2));
+		mvc.perform(get("/product/getproduct")
+		.contentType(MediaType.APPLICATION_JSON))
+		.andExpect(status().isOk());
+	}
 
 
 
